@@ -106,9 +106,17 @@ app.get("/", function (request, response) {
 });
 
 app.get("/*", function (request, response) {
-  return response
-    .status(404)
-    .json({ success: false, msg: "Not within my APIs reach..." });
+  return response.status(404).json({
+    success: false,
+    msg: "Not within my APIs reach...",
+    methods: {
+      home: "/",
+      messages: "/messages",
+      specific-message: "/messages/:id",
+      textSearch: "/messages/search?text=...",
+      latestMessages: "/messages/latest",
+    },
+  });
 });
 
 // process.env.PORT
