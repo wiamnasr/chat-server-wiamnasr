@@ -17,6 +17,7 @@ const messages = [
     id: 0,
     from: "Bart",
     text: "Welcome to CYF chat system!",
+    timeSent: "Tuesday, December 21, 2021, 10:49:59 AM",
   },
 ];
 
@@ -45,6 +46,33 @@ app.get("/messages/search", (req, res) => {
     return res.status(404).json({
       success: false,
       msg: `No texts match your search term ("${searchTerm}")`,
+    });
+  }
+});
+
+app.put("/messages/:id", (req, res) => {
+  const { id } = req.params;
+  const { from, text } = req.body;
+
+  if (id) {
+    const editMessage = messages.filter((message) => message.id === Number(id));
+    if (editMessage.length === 1) {
+      const updatedMessage = [...editMessage];
+      if (!from && !text) {
+        return res.status(404).json({
+          success: false,
+          msg: `Please include from and to in your PUT request body`,
+        });
+      }
+
+      updatedMessage[0].from = from ? from : updatedMessage[0].from;
+      updatedMessage[0].text = text ? text : updatedMessage[0].text;
+
+      return res.send(updatedMessage);
+    }
+    return res.status(404).json({
+      success: false,
+      msg: `Requested id does not exist (${searchId})`,
     });
   }
 });
@@ -82,6 +110,15 @@ app.get("/messages/:id", (req, res) => {
 });
 
 app.post("/messages", (req, res) => {
+  const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  };
   if (!req.body.from || !req.body.text) {
     return res
       .status(404)
@@ -91,6 +128,7 @@ app.post("/messages", (req, res) => {
     id: Math.random(),
     from: req.body.from,
     text: req.body.text,
+    timeSent: new Date().toLocaleDateString("gb-en", options),
   });
 
   console.log(req.body);
@@ -112,7 +150,7 @@ app.get("/*", function (request, response) {
     methods: {
       home: "/",
       messages: "/messages",
-      specific-message: "/messages/:id",
+      specificMessage: "/messages/:id",
       textSearch: "/messages/search?text=...",
       latestMessages: "/messages/latest",
     },
